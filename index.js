@@ -59,12 +59,15 @@ function RateLimiter (options) {
         var tooManyInInterval = userSet.length >= maxInInterval;
         var timeSinceLastRequest = minDifference && (now - userSet[userSet.length - 1]);
 
-        var result;
+        var result = {};
+        result.count = userSet.length;
         if (tooManyInInterval || timeSinceLastRequest < minDifference) {
-          result = Math.min(userSet[0] - now + interval, minDifference ? minDifference - timeSinceLastRequest : Infinity);
-          result = Math.floor(result/1000); // convert to miliseconds for user readability.
+          result.timeLeft = Math.min(userSet[0] - now + interval, minDifference ? minDifference - timeSinceLastRequest : Infinity);
+          result.timeLeft = Math.floor(result.timeLeft/1000); // convert to miliseconds for user readability.
+          result.exceeded = true;
         } else {
-          result = 0;
+          result.timeLeft = 0;
+          result.exceeded = false;
         }
 
         return cb(null, result)
@@ -94,12 +97,15 @@ function RateLimiter (options) {
       var tooManyInInterval = userSet.length >= maxInInterval;
       var timeSinceLastRequest = minDifference && (now - userSet[userSet.length - 1]);
 
-      var result;
+      var result = {};
+      result.count = userSet.length;
       if (tooManyInInterval || timeSinceLastRequest < minDifference) {
-        result = Math.min(userSet[0] - now + interval, minDifference ? minDifference - timeSinceLastRequest : Infinity);
-        result = Math.floor(result/1000); // convert from microseconds for user readability.
+        result.timeLeft = Math.min(userSet[0] - now + interval, minDifference ? minDifference - timeSinceLastRequest : Infinity);
+        result.timeLeft = Math.floor(result.timeLeft/1000); // convert from microseconds for user readability.
+        result.exceeded = true;
       } else {
-        result = 0;
+        result.timeLeft = 0;
+        result.exceeded = false;
       }
       userSet.push(now);
       timeouts[id] = setTimeout(function() {

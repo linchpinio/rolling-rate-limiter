@@ -24,14 +24,14 @@ var RateLimitedCounter = function(options) {
       var limit = userId ? rateLimiter.bind(null, userId) : rateLimiter
       if (cb) {
         limit(function(err, blocked) {
-          if (!blocked) {
+          if (!blocked.exceeded) {
             counts[userId]++;
           }
           cb(err);
         });
       } else {
         var blocked = limit();
-        if (!blocked) {
+        if (!blocked.exceeded) {
           counts[userId]++;
         }
       }
@@ -163,10 +163,10 @@ describe("rateLimiter", function () {
       var second = limiter1();
       var third = limiter1();
       
-      expect(first).to.equal(0);
-      expect(second).to.equal(0);
-      expect(third).to.be.above(9900);
-      expect(third).to.be.below(10001);
+      expect(first.timeLeft).to.equal(0);
+      expect(second.timeLeft).to.equal(0);
+      expect(third.timeLeft).to.be.above(9900);
+      expect(third.timeLeft).to.be.below(10001);
 
       var limiter2 = RateLimiter({
         interval: 10000,
@@ -176,9 +176,9 @@ describe("rateLimiter", function () {
 
       first = limiter2();
       second = limiter2();
-      expect(first).to.equal(0);
-      expect(second).to.be.above(90);
-      expect(second).to.be.below(101);
+      expect(first.timeLeft).to.equal(0);
+      expect(second.timeLeft).to.be.above(90);
+      expect(second.timeLeft).to.be.below(101);
     });
 
   });
@@ -450,10 +450,10 @@ describe("rateLimiter", function () {
       async.times(3, function(n, next) {
         limiter1(next);
       }, function(err, results) {
-        expect(results[0]).to.equal(0);
-        expect(results[1]).to.equal(0);
-        expect(results[2]).to.be.above(9900);
-        expect(results[2]).to.be.below(10001);
+        expect(results[0].timeLeft).to.equal(0);
+        expect(results[1].timeLeft).to.equal(0);
+        expect(results[2].timeLeft).to.be.above(9900);
+        expect(results[2].timeLeft).to.be.below(10001);
 
         // ---
 
@@ -465,9 +465,9 @@ describe("rateLimiter", function () {
         async.times(3, function(n, next) {
           limiter2(next);
         }, function(err, results) {
-          expect(results[0]).to.equal(0);
-          expect(results[1]).to.be.above(90);
-          expect(results[1]).to.be.below(101);
+          expect(results[0].timeLeft).to.equal(0);
+          expect(results[1].timeLeft).to.be.above(90);
+          expect(results[1].timeLeft).to.be.below(101);
           done();
         });
       });
