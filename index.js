@@ -65,6 +65,7 @@ function RateLimiter (options) {
           result.timeLeft = Math.min(userSet[0] - now + interval, minDifference ? minDifference - timeSinceLastRequest : Infinity);
           result.timeLeft = Math.floor(result.timeLeft/1000); // convert to miliseconds for user readability.
           result.exceeded = true;
+          redis.zrem(key,now); // if rate limit was exceeded, don't count this attempt.
         } else {
           result.timeLeft = 0;
           result.exceeded = false;
